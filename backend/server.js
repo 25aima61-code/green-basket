@@ -1,6 +1,6 @@
 const express = require("express");
-const { Pool } = require("pg");
 const path = require("path");
+const { Pool } = require("pg");
 
 const app = express();
 
@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: true }));
 // Serve frontend
 app.use(express.static(path.join(__dirname, "..")));
 
-// PostgreSQL connection (Railway)
+// PostgreSQL connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -18,7 +18,7 @@ const pool = new Pool({
   }
 });
 
-// Test DB connection
+// Test DB
 pool.connect()
   .then(() => console.log("Connected to PostgreSQL ✅"))
   .catch(err => console.log("DB ERROR:", err));
@@ -32,12 +32,12 @@ app.get("/", (req, res) => {
 app.post("/add-order", async (req, res) => {
   console.log("DATA RECEIVED:", req.body);
 
-  const { name, email, className, item } = req.body;
+  const { name, email, item, quantity } = req.body;
 
   try {
     await pool.query(
-      "INSERT INTO orders (name, email, class, item) VALUES ($1, $2, $3, $4)",
-      [name, email, className, item]
+      "INSERT INTO orders (name, email, item, quantity) VALUES ($1, $2, $3, $4)",
+      [name, email, item, quantity]
     );
 
     res.send("Order Placed Successfully ✅");
@@ -58,6 +58,7 @@ app.get("/orders", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
+
 app.listen(PORT, () => {
   console.log(Server running on port ${PORT});
 });
